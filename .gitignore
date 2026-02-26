@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+build/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcodeproj/xcshareddata/WorkspaceSettings.xcsettings
+
+# SwiftPM
+.build/
+Package.resolved
+
+# User settings
+*.swp
+*.swo
+*.tmp
+
+# App packaging
+*.dSYM
+*.ipa
+*.app
+
+# Local tools / references
+/tmp/
