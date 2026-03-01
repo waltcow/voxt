@@ -2,6 +2,7 @@ import SwiftUI
 import AppKit
 import ApplicationServices
 import CoreAudio
+import AVFoundation
 
 enum TranscriptionEngine: String, CaseIterable, Identifiable {
     case dictation
@@ -228,7 +229,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         buildMenu()
 
         Task {
-            let granted = await speechTranscriber.requestPermissions()
+            let granted = await requestMicrophonePermission()
             if !granted {
                 showPermissionAlert()
                 return
@@ -744,15 +745,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func startSpeechRecordingSession() {
-        speechTranscriber.onTranscriptionFinished = { [weak self] text in
-            self?.processTranscription(text)
+        Task { [weak self] in
+            guard let self else { return }
+            let granted = await self.speechTranscriber.requestPermissions()
+            guard granted else {
+                self.finishSession(after: 0)
+                self.showPermissionAlert()
+                return
+            }
+
+            self.speechTranscriber.onTranscriptionFinished = { [weak self] text in
+                self?.processTranscription(text)
+            }
+            self.overlayState.bind(to: self.speechTranscriber)
+            self.overlayWindow.show(
+                state: self.overlayState,
+                position: self.overlayPosition
+            )
+            self.speechTranscriber.startRecording()
         }
-        overlayState.bind(to: speechTranscriber)
-        overlayWindow.show(
-            state: overlayState,
-            position: overlayPosition
-        )
-        speechTranscriber.startRecording()
+    }
+
+    private func requestMicrophonePermission() async -> Bool {
+        await AVCaptureDevice.requestAccess(for: .audio)
     }
 
     private func setEnhancingState(_ isEnhancing: Bool) {
