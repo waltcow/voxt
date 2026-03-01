@@ -136,27 +136,6 @@ Chinese documentation: [简体中文](README.zh-CN.md)
 xcodebuild -project Voxt.xcodeproj -scheme Voxt -destination 'platform=macOS' build
 ```
 
-### Automated Release
-
-- Workflow: `.github/workflows/release.yml`
-- Trigger:
-  - Publish a GitHub Release with tag format `vX.Y.Z`, or
-  - Run `workflow_dispatch` manually and provide `tag`.
-- What it does:
-  1. Builds `Voxt.app` in `Release` mode.
-  2. Creates `Voxt-<version>.pkg` and `Voxt-<version>-macOS.zip`.
-  3. Generates `appcast.json` (with `sha256`, `downloadURL`, `publishedAt`).
-  4. Uploads assets to the GitHub Release.
-  5. Updates repository `updates/appcast.json` on the default branch.
-
-For local packaging or debugging, use:
-
-```bash
-scripts/release/build_pkg.sh 1.2.0 build/release
-scripts/release/generate_appcast.sh 1.2.0 build/release/Voxt-1.2.0.pkg \
-  "https://github.com/<owner>/<repo>/releases/download/v1.2.0/Voxt-1.2.0.pkg"
-```
-
 ## Thanks
 
 - [mlx-audio-swift](https://github.com/Blaizzy/mlx-audio-swift)

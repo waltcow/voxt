@@ -1,4 +1,2 @@
-interface:
-  display_name: "Voxt Release"
-  short_description: "Run Voxt local release packaging and changelog prep"
-  default_prompt: "Use $voxt-release to run the Voxt local release flow: update changelog, build artifacts, and sync appcast."
+name: voxt-release
+entry: SKILL.md

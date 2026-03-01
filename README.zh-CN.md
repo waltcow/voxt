@@ -137,27 +137,6 @@ https://github.com/user-attachments/assets/23d42c24-7128-4bdb-bc1d-98509e69d97e
 xcodebuild -project Voxt.xcodeproj -scheme Voxt -destination 'platform=macOS' build
 ```
 
-### 自动化发布
-
-- Workflow：`.github/workflows/release.yml`
-- 触发方式：
-  - 在 GitHub 发布一个 `vX.Y.Z` 格式的 Release，或
-  - 手动运行 `workflow_dispatch` 并填写 `tag`。
-- 自动流程会执行：
-  1. 以 `Release` 配置构建 `Voxt.app`。
-  2. 生成 `Voxt-<version>.pkg` 与 `Voxt-<version>-macOS.zip`。
-  3. 生成包含 `sha256`、`downloadURL`、`publishedAt` 的 `appcast.json`。
-  4. 上传产物到 GitHub Release。
-  5. 自动更新默认分支下的 `updates/appcast.json`。
-
-本地打包或调试可使用：
-
-```bash
-scripts/release/build_pkg.sh 1.2.0 build/release
-scripts/release/generate_appcast.sh 1.2.0 build/release/Voxt-1.2.0.pkg \
-  "https://github.com/<owner>/<repo>/releases/download/v1.2.0/Voxt-1.2.0.pkg"
-```
-
 ## Thanks
 
 - [mlx-audio-swift](https://github.com/Blaizzy/mlx-audio-swift)

@@ -1,148 +1,49 @@
 ---
 name: voxt-release
-description: Local release manager for Voxt. Use when the user asks to prepare a new Voxt version, generate release notes, build artifacts, or update appcast for in-app updates.
+description: Local release workflow for Voxt. Use this after building a local .pkg/.zip with Xcode Archive. Updates appcast and changelog, then creates git tag and GitHub release.
 ---
 
-# Voxt Release
+# Voxt Local Release Skill
 
-## Overview
+## When to use
+- You already built release artifacts locally (at least `Voxt-<version>.pkg`).
+- You want to update `updates/appcast.json`, update `CHANGELOG.md`, create `git tag`, and publish a GitHub release.
 
-This skill executes the project-local release flow for Voxt.
-It is used when the user asks to:
+## Prerequisites
+- `gh` CLI is installed and authenticated.
+- `origin` points to the target GitHub repository.
+- Local build artifact exists, for example:
+  - `build/release/Voxt-1.1.8.pkg`
+  - optional: `build/release/Voxt-1.1.8-macOS.zip`
 
-- prepare/release a new version
-- generate release notes from git history
-- prepare local release package artifacts
-- update `updates/appcast.json`
-- prepare release commits
-
-## Quick Start
-
-1. Confirm release target and current repository state.
-2. Follow the local release flow (no auto GitHub release workflow is used).
-3. Prepare release artifacts locally in Xcode and place them in `build/release/artifacts/`.
-4. Keep `CHANGELOG.md`, `build/release/artifacts/*`, and `updates/appcast.json` consistent.
-5. Mandatory before release: `CHANGELOG.md` must include a new release section for the target version.
-6. Create/push git tag and publish GitHub release assets when shipping.
-
-## Required Inputs
-
-- `VERSION`: target semantic version string, e.g. `1.2.3` (do not include `v` prefix)
-- Repository should have a clean or intentional dirty working tree state depending on pre-release checks.
-
-## Workflow
-
-### Step 1 — Prepare changelog (mandatory)
-
-- Open `CHANGELOG.md`.
-- Follow the changelog section style currently used in the file.
-- Generate notes manually from git history or with `git log`.
-- Insert notes under a new version section and keep `## [Unreleased]` section for future entries.
-- Do not proceed to build if changelog is not updated for the target version.
-
-Suggested command pattern:
-
-```bash
-VERSION="1.2.3"
-BASE_TAG="$(git tag --list 'v*' --sort=-v:refname | sed -n '1p')"
-echo "## [${VERSION}] - $(date +%F)"
-echo "### Added"
-git log ${BASE_TAG:+${BASE_TAG}..HEAD} --grep='^feat\\|^add' --pretty='- %s'
-echo "### Fixed"
-git log ${BASE_TAG:+${BASE_TAG}..HEAD} --grep='^fix\\|^bug' --pretty='- %s'
-echo "### Changed"
-git log ${BASE_TAG:+${BASE_TAG}..HEAD} --grep='^refactor\\|^perf\\|^chore' --pretty='- %s'
-```
-
-### Step 2 — Build release artifacts locally in Xcode
-
-In Xcode:
-
-```bash
-1. In Xcode, run Archive and export:
-   - `Voxt-<VERSION>.app.zip`
-   - `Voxt-<VERSION>.pkg`
-2. Copy both artifacts into:
-   - `build/release/artifacts/Voxt-<VERSION>.app.zip`
-   - `build/release/artifacts/Voxt-<VERSION>.pkg`
-```
-
-Expected outputs:
-
-- `build/release/artifacts/Voxt-<VERSION>.app.zip`
-- `build/release/artifacts/Voxt-<VERSION>.pkg`
-
-### Step 3 — Update in-repo manifest from local artifacts
-
+## One-command flow
 Run:
 
 ```bash
-VERSION="1.2.3"
-PKG_PATH="build/release/artifacts/Voxt-${VERSION}.pkg"
-SHA256="$(shasum -a 256 "${PKG_PATH}" | awk '{print $1}')"
-cat > updates/appcast.json <<JSON
-{
-  "version": "${VERSION}",
-  "minimumSupportedVersion": "${VERSION}",
-  "downloadURL": "https://github.com/hehehai/voxt/releases/download/v${VERSION}/Voxt-${VERSION}.pkg",
-  "releaseNotes": "See CHANGELOG.md for details.",
-  "publishedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "sha256": "${SHA256}"
-}
-JSON
+scripts/release/publish_local_release.sh \
+  --version 1.1.8 \
+  --pkg build/release/Voxt-1.1.8.pkg \
+  --zip build/release/Voxt-1.1.8-macOS.zip \
+  --notes "See CHANGELOG.md for details." \
+  --changelog "- Your release highlight here." \
+  --commit --push
 ```
 
-### Step 4 — Commit
+## What the script does
+1. Computes package sha256.
+2. Updates `updates/appcast.json` with:
+   - `version`
+   - `minimumSupportedVersion`
+   - `downloadURL`
+   - `releaseNotes`
+   - `publishedAt`
+   - `sha256`
+3. Inserts a new version section into `CHANGELOG.md` right after `## [Unreleased]`.
+4. Optionally commits changes.
+5. Creates annotated git tag `v<version>`.
+6. Creates GitHub release and uploads `.pkg` (and optional `.zip`).
+7. Optionally pushes commit and tags.
 
-- Include at least:
-  - `CHANGELOG.md`
-  - `updates/appcast.json`
-  - optionally any required artifacts metadata
-
-Example:
-
-```bash
-git add CHANGELOG.md updates/appcast.json
-git commit -m "release: v1.2.3"
-```
-
-### Step 5 — Publish GitHub release
-
-1. Create and push git tag:
-
-```bash
-git tag v1.2.3
-git push origin v1.2.3
-```
-
-2. Publish release and upload artifacts:
-
-```bash
-gh release create v1.2.3 \
-  --title "v1.2.3" \
-  --notes "Release 1.2.3" \
-  build/release/artifacts/Voxt-1.2.3.app.zip \
-  build/release/artifacts/Voxt-1.2.3.pkg
-```
-
-If the release already exists:
-
-```bash
-gh release upload v1.2.3 \
-  build/release/artifacts/Voxt-1.2.3.app.zip \
-  build/release/artifacts/Voxt-1.2.3.pkg \
-  --clobber
-```
-
-## Validation checklist
-
-- Changelog update and build/manifest flow steps below have been followed.
-- `CHANGELOG.md` has a new release entry for the version being released.
-- Manifest URL still points to `https://raw.githubusercontent.com/hehehai/voxt/main/updates/appcast.json`.
-- `AppUpdateManager` can read updated `version`, `minimumSupportedVersion`, and `downloadURL` from manifest.
-- `git diff` shows no unrelated file churn after release commit.
-
-## Allowed tools
-
-- `Bash` for `git`, `sed`, `awk`.
-- `Bash` for file viewing/modification commands under `updates/`.
+## Notes
+- Keep version numeric (for in-app update comparison), e.g. `1.1.8`.
+- Avoid suffix versions like `1.1.8-rc1` because the app compares dot-separated numeric parts.
