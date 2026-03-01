@@ -7,8 +7,14 @@ The format is based on Keep a Changelog.
 ## [Unreleased]
 
 ### Added
+- Test release based on local Voxt.app archive package.
 - In-app update checks with menu entry and optional automatic check at launch.
 - Release scripts for generating `.app.zip`, `.pkg`, and update manifest.
+
+## [1.1.1] - 2026-03-01
+
+### Added
+- Test release based on local Voxt.app archive package.
 
 ## [1.1.6] - 2026-03-01
 

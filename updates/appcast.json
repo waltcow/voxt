@@ -1,8 +1,8 @@
 {
-  "version": "1.1.6",
-  "minimumSupportedVersion": "1.1.6",
-  "downloadURL": "https://github.com/hehehai/voxt/releases/download/v1.1.6/Voxt-1.1.6.pkg",
-  "releaseNotes": "See CHANGELOG.md for details.",
-  "publishedAt": "2026-03-01T06:47:30Z",
-  "sha256": "116b7172f47d90492a2a3ce3e1b821f1f313758baca6abe9188b3c2405314bd4"
+  "version": "1.1.1",
+  "minimumSupportedVersion": "1.1.1",
+  "downloadURL": "https://github.com/hehehai/voxt/releases/download/v1.1.1/Voxt-1.1.1.pkg",
+  "releaseNotes": "Test release from local Voxt.app package.",
+  "publishedAt": "2026-03-01T07:47:41Z",
+  "sha256": "d72a1348274bad060995fe62d4de929d2c44b91703b78fe716aca14904df7d7f"
 }
